@@ -3,7 +3,9 @@ package matrices;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,21 +18,18 @@ import java.util.List;
  */
 
 
-public class Matriz implements Serializable{
-	
-	
-	private static final long serialVersionUID = 1L;
+public class Matriz{
 	int nFilas_;
 	int nColumnas_;
 	static String nombreFichero_;
-	private List<List<Double>> matrixA_ = new ArrayList<>();
-	private List<List<Double>> matrixB_ = new ArrayList<>();
+	private List<List<Double>> matrix_ = new ArrayList<>();
 	
 	public Matriz(String nombreFichero) throws IOException {
 		String linea;
 		nombreFichero_=nombreFichero; 
-		FileReader f = new FileReader(nombreFichero);
-	    BufferedReader b = new BufferedReader(f);
+		FileReader f = new FileReader(nombreFichero_);
+		BufferedReader b = new BufferedReader(f);
+	    b = new BufferedReader(f);
 	    linea = b.readLine();
 	    String[] numeros = linea.split(" ");
 	    nFilas_ = Integer.parseInt(numeros[0]);
@@ -47,23 +46,68 @@ public class Matriz implements Serializable{
     				rowList.add(Double.parseDouble(numeros[i]));
 	    		}
 	    		if(lineCounter < nFilas_)
-					matrixA_.add(rowList);
-				else
-					matrixB_.add(rowList);
+					matrix_.add(rowList);
 	    		lineCounter++;
 	    	}
 	    }
 	    b.close();
 	}
 	
+	public Matriz(int squareMatrixSize) {
+		FileWriter fichero = null;
+        PrintWriter pw = null;
+        try{
+            fichero = new FileWriter("/home/alien/Escritorio/P2_ALGORITMOS_MULTIPLICACION/ull-esit-inf-daa-1819-pract2-Alien-97/src/matrices/1.txt");
+            pw = new PrintWriter(fichero);
+            for (int i = 0; i < 10; i++) {
+            	pw.println("IMPRIMETE YA MUCHACHO");
+                pw.println("Linea " + i);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+           try {
+           // Nuevamente aprovechamos el finally para 
+           // asegurarnos que se cierra el fichero.
+           if (null != fichero)
+              fichero.close();
+           } catch (Exception e2) {
+              e2.printStackTrace();
+           }
+        } 
+	}
+	
+	public int getMatrixARowsSize() {
+		return matrix_.size();
+	}
+	public int getMatrixAColumnsSize() {
+		return matrix_.get(0).size();
+	}
 	public void checkSquareMatrix() {
-		if(nFilas_!=nColumnas_) {
-			if(nFilas_>nColumnas_) {
-				nColumnas_=nFilas_;
+		if(getMatrixARowsSize()>getMatrixAColumnsSize()) {
+			int temp = getMatrixAColumnsSize();
+			int cont=0;
+			ArrayList<Double> col = new ArrayList<>(getMatrixARowsSize() - getMatrixAColumnsSize());
+			for(int i=0;i<col.size();i++) {
+				col.add(0.0);
 			}
-			else {
-				nFilas_=nColumnas_;
+			while(cont < (getMatrixARowsSize() - temp)) {
+				addColumn(matrix_.size(),col);
+				cont++;
 			}
+			nColumnas_=nFilas_;
+		}
+		else {
+			int cont=0;
+			ArrayList<Double> col = new ArrayList<>(getMatrixAColumnsSize() - getMatrixARowsSize());
+			for(int i=0;i<col.size();i++) {
+				col.add(0.0);
+			}
+			while(cont < (getMatrixAColumnsSize() - getMatrixARowsSize())){
+				addRow(matrix_.size(),col);
+				cont++;
+			}
+			nFilas_=nColumnas_;
 		}
 	}
 	
@@ -77,57 +121,45 @@ public class Matriz implements Serializable{
 	}
 	
 	public void resizeMatrix(int pow) {
-		
+		int delta = pow - matrix_.size();
+		ArrayList<Double> newRowAndColumn = new ArrayList<>(matrix_.size() + delta);
+		for(int i=0;i<newRowAndColumn.size();i++) {
+			newRowAndColumn.add(0.0);
+		}
+		for(int i=0;i<delta;i++) {
+			addRow(matrix_.size(),newRowAndColumn);
+			addColumn(matrix_.size(),newRowAndColumn);
+		}
 	}
 	
-	public void addRow(boolean matrixId,int rowIndexWhereInsert, ArrayList<Double> newRow) {
-		if(!matrixId) {
-			matrixA_.add(rowIndexWhereInsert, newRow);
-		}
-		else if(matrixId) {
-			matrixB_.add(rowIndexWhereInsert,newRow);
-		}
+	public void addRow(int rowIndexWhereInsert, ArrayList<Double> newRow) {	
+		matrix_.add(rowIndexWhereInsert, newRow);
 	}
 
-	public void addColumn(boolean matrixId,int columnIndexWhereInsert, ArrayList<Double> newColumn) {
-		if(!matrixId) {
-		    for (int k = 0; k < matrixA_.size(); k++) {
-		        ArrayList<Double> row = (ArrayList<Double>) getRow(false,k);
-		        row.add(columnIndexWhereInsert, newColumn.get(k));
-		    }        
-		}
-		else if(matrixId){
-			for (int k = 0; k < matrixB_.size(); k++) {
-		        ArrayList<Double> row = (ArrayList<Double>) getRow(true,k);
-		        row.add(columnIndexWhereInsert, newColumn.get(k));
-		    }        
-		}	
+	public void addColumn(int columnIndexWhereInsert, ArrayList<Double> newColumn) {
+	    for (int k = 0; k < matrix_.size(); k++) {
+	        ArrayList<Double> row = (ArrayList<Double>) getRow(false,k);
+	        row.add(columnIndexWhereInsert, newColumn.get(k));
+	    }              
 	}
 	
 	public Double getElementByPosition(boolean matrixId,int i,int j) {
-		return matrixId? matrixB_.get(i).get(j): matrixA_.get(i).get(j);
+		return matrixId? matrix_.get(i).get(j): matrix_.get(i).get(j);
 	}
 	
 	public List<Double> getRow(boolean matrixId, int rowIndex) {
-		return matrixId? matrixB_.get(rowIndex) : matrixA_.get(rowIndex);
+		return matrixId? matrix_.get(rowIndex) : matrix_.get(rowIndex);
 	}
 
 	public String toString() {
-		String entrada= "Matriz A" + "\n";
-		for(int i=0;i<matrixA_.size();i++){
-			for(int j=0;j<matrixA_.get(i).size();j++){
-				entrada += matrixA_.get(i).get(j) + " ";
+		String entrada= "Matriz " + "\n";
+		for(int i=0;i<matrix_.size();i++){
+			for(int j=0;j<matrix_.get(i).size();j++){
+				entrada += matrix_.get(i).get(j) + " ";
 			}
 			entrada += "\n";
 		}
 		entrada += "\n";
-		entrada += "Matriz B" + "\n";
-		for(int i=0;i<matrixB_.size();i++) {
-			for(int j=0;j<matrixB_.get(i).size();j++) {
-				entrada += matrixB_.get(i).get(j) + " ";
-			}
-			entrada += "\n";
-		}
 		return entrada;
 	}
 }
