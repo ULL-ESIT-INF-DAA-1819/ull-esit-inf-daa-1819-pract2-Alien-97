@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +41,7 @@ public class Matriz{
 	    		numeros = linea.split(" ");
 	    		ArrayList<Double> rowList= new ArrayList<>(nColumnas_);
 	    		for(int i=0;i<nColumnas_;i++) {
-    				System.out.println("numero de linea " + lineCounter +  " elemento de la linea " + numeros[i]);
+    				//System.out.println("numero de linea " + lineCounter +  " elemento de la linea " + numeros[i]);
     				rowList.add(Double.parseDouble(numeros[i]));
 	    		}
 	    		if(lineCounter < nFilas_)
@@ -50,18 +49,20 @@ public class Matriz{
 	    		lineCounter++;
 	    	}
 	    }
+	    checkSquareMatrix();
 	    b.close();
 	}
 	
-	public Matriz(int squareMatrixSize) {
+	public Matriz(int nCols, int nRows) {
 		FileWriter fichero = null;
         PrintWriter pw = null;
         try{
-            fichero = new FileWriter("/home/alien/Escritorio/P2_ALGORITMOS_MULTIPLICACION/ull-esit-inf-daa-1819-pract2-Alien-97/src/matrices/1.txt");
+            fichero = new FileWriter("./matrix.txt");
             pw = new PrintWriter(fichero);
-            for (int i = 0; i < 10; i++) {
-            	pw.println("IMPRIMETE YA MUCHACHO");
-                pw.println("Linea " + i);
+            for (int i = 0; i < nRows; i++) {
+            	for(int j=0; j < nCols; j++) {
+            		pw.println((Math.random() * 50) + 1);
+            	}
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -70,7 +71,7 @@ public class Matriz{
            // Nuevamente aprovechamos el finally para 
            // asegurarnos que se cierra el fichero.
            if (null != fichero)
-              fichero.close();
+              pw.close();
            } catch (Exception e2) {
               e2.printStackTrace();
            }
@@ -137,18 +138,19 @@ public class Matriz{
 	}
 
 	public void addColumn(int columnIndexWhereInsert, ArrayList<Double> newColumn) {
-	    for (int k = 0; k < matrix_.size(); k++) {
-	        ArrayList<Double> row = (ArrayList<Double>) getRow(false,k);
-	        row.add(columnIndexWhereInsert, newColumn.get(k));
+	    for (int i = 0; i < matrix_.size(); i++) {
+	        ArrayList<Double> row = (ArrayList<Double>) getRow(i);
+	        for(int j=0; j< newColumn.size(); j++ )
+	        	row.add(newColumn.get(j));
 	    }              
 	}
 	
-	public Double getElementByPosition(boolean matrixId,int i,int j) {
-		return matrixId? matrix_.get(i).get(j): matrix_.get(i).get(j);
+	public Double getElementByPosition(int i,int j) {
+		return  matrix_.get(i).get(j);
 	}
 	
-	public List<Double> getRow(boolean matrixId, int rowIndex) {
-		return matrixId? matrix_.get(rowIndex) : matrix_.get(rowIndex);
+	public List<Double> getRow(int rowIndex) {
+		return  matrix_.get(rowIndex);
 	}
 
 	public String toString() {
