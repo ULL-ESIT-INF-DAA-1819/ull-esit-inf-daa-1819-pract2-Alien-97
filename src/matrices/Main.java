@@ -8,10 +8,12 @@ public class Main {
 	public static void main(String args[]) throws IOException{
 		String nombreFichero=args[0];
 		Matriz matrixOne = new Matriz(nombreFichero);
-		matrixOne= new Matriz(100,100);
+		//Matriz matrixOne = new Matriz(100,100);
+		//System.out.println(matrixOne);
 		nombreFichero=args[1];
 		Matriz matrixTwo = new Matriz(nombreFichero);
-		System.out.println(matrixOne);
 		System.out.println(matrixTwo);
+		
+		//Matriz c = matrixOne.strassen(b)
 	}
 }
