@@ -18,9 +18,9 @@ import java.util.List;
 
 
 public class Matriz{
-	int nFilas_;
-	int nColumnas_;
-	static String nombreFichero_;
+	private int nFilas_;
+	private int nColumnas_;
+	private static String nombreFichero_;
 	private List<List<Double>> matrix_ = new ArrayList<>();
 	
 	public Matriz(String nombreFichero) throws IOException {
@@ -50,6 +50,10 @@ public class Matriz{
 	    }
 	    checkSquareMatrix();
 	    b.close();
+	}
+	
+	public Matriz(int n) {
+		List<List<Double>> matrix = new ArrayList<>(n);
 	}
 	
 	public Matriz(int nCols, int nRows) {
@@ -91,6 +95,12 @@ public class Matriz{
               e2.printStackTrace();
            }
         } 
+	}
+	
+	public Matriz(Matriz objeto) {
+		this.nColumnas_ = objeto.nColumnas_;
+		this.nFilas_=objeto.nFilas_;
+		this.matrix_=objeto.matrix_;
 	}
 	
 	public int getMatrixRowsSize() {
@@ -181,28 +191,38 @@ public class Matriz{
 
 	public Matriz strassen(Matriz b) {
 		powerOfTwo();
-		return strassen(this,b);
+		if(sameSize(this,b))
+			return strassen(this,b);
+		return null;
 	}
 	
-	public static Matriz strassen(Matriz a,Matriz b)
+	public boolean sameSize(Matriz a, Matriz b) {
+		boolean mismoSize=false;
+		if((a.getMatrixRowsSize()==b.getMatrixRowsSize()) && (a.getMatrixColumnsSize()==b.getMatrixColumnsSize())) {
+			mismoSize=true;
+		}
+		return mismoSize;
+	}
+	public static Matriz strassen(Matriz a,Matriz b) 
 	{
 		int n = a.getMatrixRowsSize();
-		Matriz result = new Matriz();
+		Matriz result = new Matriz(n);//Duda
 		if(n == 1)
 		{
-			result[0][0] = a[0][0] * b[0][0];
+			Double temp = result.getElementByPosition(0,0);
+			temp= a.getElementByPosition(0,0) * b.getElementByPosition(0, 0);
 		}
 		else
 		{
-			Matriz A11 = new Matriz[n/2][n/2];
-			Matriz A12 = new Matriz[n/2][n/2];
-			Matriz A21 = new Matriz[n/2][n/2];
-			Matriz A22 = new Matriz[n/2][n/2];
-	
-			Matriz B11 = new Matriz[n/2][n/2];
-			Matriz B12 = new Matriz[n/2][n/2];
-			Matriz B21 = new Matriz[n/2][n/2];
-			Matriz B22 = new Matriz[n/2][n/2];
+			Matriz A11 = new Matriz(a.getMatrixRowsSize()/2,a.getMatrixColumnsSize()/2);
+			Matriz A12 = new Matriz(a.getMatrixRowsSize()/2,a.getMatrixColumnsSize()/2);
+			Matriz A21 = new Matriz(a.getMatrixRowsSize()/2,a.getMatrixColumnsSize()/2);
+			Matriz A22 = new Matriz(a.getMatrixRowsSize()/2,a.getMatrixColumnsSize()/2);
+			
+			Matriz B11 = new Matriz(b.getMatrixRowsSize()/2,b.getMatrixColumnsSize()/2);
+			Matriz B12 = new Matriz(b.getMatrixRowsSize()/2,b.getMatrixColumnsSize()/2);
+			Matriz B21 = new Matriz(b.getMatrixRowsSize()/2,b.getMatrixColumnsSize()/2);
+			Matriz B22 = new Matriz(b.getMatrixRowsSize()/2,b.getMatrixColumnsSize()/2);
 	
 			divide(a, A11, 0 , 0);
 			divide(a, A12, 0 , n/2);
@@ -214,18 +234,18 @@ public class Matriz{
 			divide(b, B21, n/2, 0);
 			divide(b, B22, n/2, n/2);
 	
-			int [][] P1 = strassen(add(A11, A22), add(B11, B22));
-			int [][] P2 = strassen(add(A21, A22), B11);
-			int [][] P3 = strassen(A11, sub(B12, B22));
-			int [][] P4 = strassen(A22, sub(B21, B11));
-			int [][] P5 = strassen(add(A11, A12), B22);
-			int [][] P6 = strassen(sub(A21, A11), add(B11, B12));
-			int [][] P7 = strassen(sub(A12, A22), add(B21, B22));
+			Matriz P1 = strassen(add(A11, A22), add(B11, B22));
+			Matriz P2 = strassen(add(A21, A22), B11);
+			Matriz P3 = strassen(A11, sub(B12, B22));
+			Matriz P4 = strassen(A22, sub(B21, B11));
+			Matriz P5 = strassen(add(A11, A12), B22);
+			Matriz P6 = strassen(sub(A21, A11), add(B11, B12));
+			Matriz P7 = strassen(sub(A12, A22), add(B21, B22));
 	
-			int [][] C11 = add(sub(add(P1, P4), P5), P7);
-			int [][] C12 = add(P3, P5);
-			int [][] C21 = add(P2, P4);
-			int [][] C22 = add(sub(add(P1, P3), P2), P6);
+			Matriz C11 = add(sub(add(P1, P4), P5), P7);
+			Matriz C12 = add(P3, P5);
+			Matriz C21 = add(P2, P4);
+			Matriz C22 = add(sub(add(P1, P3), P2), P6);
 	
 			copy(C11, result, 0 , 0);
 			copy(C12, result, 0 , n/2);
@@ -235,47 +255,56 @@ public class Matriz{
 		return result;
 	}
 	
-	public static int [][] add(int [][] A, int [][] B)
+	public static Matriz add(Matriz A, Matriz B)
 	{
-		int n = A.length;
-	
-		int [][] result = new int[n][n];
-	
+		int n = A.getMatrixRowsSize();
+		Matriz result = new Matriz(n,n);
 		for(int i=0; i<n; i++)
-			for(int j=0; j<n; j++)
-			result[i][j] = A[i][j] + B[i][j];
-	
+			for(int j=0; j<A.getMatrixColumnsSize(); j++) {
+				Double temp = result.getElementByPosition(i, j);
+				temp = A.getElementByPosition(i, j) + B.getElementByPosition(i, j);
+			}
 		return result;
 	}
 	
-	public static int [][] sub(int [][] A, int [][] B)
+	public static Matriz sub(Matriz A, Matriz B)
 	{
-		int n = A.length;
-	
-		int [][] result = new int[n][n];
-	
+		int n = A.getMatrixRowsSize();
+		Matriz result = new Matriz(n,n);
 		for(int i=0; i<n; i++)
-			for(int j=0; j<n; j++)
-			result[i][j] = A[i][j] - B[i][j];
-	
+			for(int j=0; j<A.getMatrixColumnsSize(); j++) {
+				Double temp = result.getElementByPosition(i, j);
+				temp = A.getElementByPosition(i,j) - B.getElementByPosition(i, j);
+				
+			}
 		return result;
 	}
 	
-	public static void divide(int[][] p1, int[][] c1, int iB, int jB)
+	public static void divide(Matriz p1, Matriz c1, int iB, int jB)
 	{
-		for(int i1 = 0, i2=iB; i1<c1.length; i1++, i2++)
-			for(int j1 = 0, j2=jB; j1<c1.length; j1++, j2++)
+		for(int i1 = 0, i2=iB; i1<c1.getMatrixRowsSize(); i1++, i2++)
+			for(int j1 = 0, j2=jB; j1<c1.getMatrixColumnsSize(); j1++, j2++)
 			{
-				c1[i1][j1] = p1[i2][j2];
+				Double temp = c1.getElementByPosition(i1, j1);
+				temp = p1.getElementByPosition(i2,j2);
 			}
 	}
 	
-	public static void copy(int[][] c1, int[][] p1, int iB, int jB)
+	
+	public void set(int i,int j,Double number) {
+		matrix_.get(i).set(j,number);
+	}
+	
+	public Double get(int i, int j) {
+		return 
+	}
+	public static void copy(Matriz c1, Matriz p1, int iB, int jB)
 	{
-		for(int i1 = 0, i2=iB; i1<c1.length; i1++, i2++)
-			for(int j1 = 0, j2=jB; j1<c1.length; j1++, j2++)
+		for(int i1 = 0, i2=iB; i1<c1.getMatrixRowsSize(); i1++, i2++)
+			for(int j1 = 0, j2=jB; j1<c1.getMatrixColumnsSize(); j1++, j2++)
 			{
-				p1[i2][j2] = c1[i1][j1];
+				Double temp = p1.getElementByPosition(i2,j2);
+				temp = c1.getElementByPosition(i1, j1);
 			}
 	}
 }

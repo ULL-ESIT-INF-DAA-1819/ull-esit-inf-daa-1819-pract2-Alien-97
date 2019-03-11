@@ -7,13 +7,10 @@ import java.io.IOException;
 public class Main {
 	public static void main(String args[]) throws IOException{
 		String nombreFichero=args[0];
-		Matriz matrixOne = new Matriz(nombreFichero);
-		//Matriz matrixOne = new Matriz(100,100);
-		//System.out.println(matrixOne);
+		Matriz matrixOne = new Matriz(100,100);
 		nombreFichero=args[1];
 		Matriz matrixTwo = new Matriz(nombreFichero);
 		System.out.println(matrixTwo);
-		
 		//Matriz c = matrixOne.strassen(b)
 	}
 }
