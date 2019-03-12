@@ -53,7 +53,9 @@ public class Matriz{
 	}
 	
 	public Matriz(int n) {
-		List<List<Double>> matrix = new ArrayList<>(n);
+		List<List<Double>> mat = new ArrayList<>(n);
+		nFilas_ = n;
+		nColumnas_ = n;
 	}
 	
 	public Matriz(int nCols, int nRows) {
@@ -97,18 +99,14 @@ public class Matriz{
         } 
 	}
 	
-	public Matriz(Matriz objeto) {
-		this.nColumnas_ = objeto.nColumnas_;
-		this.nFilas_=objeto.nFilas_;
-		this.matrix_=objeto.matrix_;
-	}
-	
 	public int getMatrixRowsSize() {
 		return matrix_.size();
 	}
+	
 	public int getMatrixColumnsSize() {
 		return matrix_.get(0).size();
 	}
+	
 	public void checkSquareMatrix() {
 		if(getMatrixRowsSize()>getMatrixColumnsSize()) {
 			int temp = getMatrixRowsSize() - getMatrixColumnsSize();
@@ -117,7 +115,7 @@ public class Matriz{
 				col.add(0.0);
 			}
 			addColumn(col);
-			nColumnas_=nFilas_;
+			//nColumnas_=nFilas_;
 		}
 		else {
 			int numberOfRows= getMatrixColumnsSize() - getMatrixRowsSize();
@@ -126,14 +124,14 @@ public class Matriz{
 				row.add(0.0);
 			}
 			addRow(row, numberOfRows);
-			nFilas_=nColumnas_;
+			//nFilas_=nColumnas_;
 		}
 	}
 	
 	public void powerOfTwo() {
 		checkSquareMatrix();
 		int pow = 1;
-		while(pow<nFilas_){
+		while(pow<getMatrixRowsSize()){
 			pow=pow*2;
 		}
 		resizeMatrix(pow);
@@ -143,7 +141,7 @@ public class Matriz{
 		int additionalRows = pow - matrix_.size();
 		int additionalCols = pow - matrix_.get(0).size();
 		ArrayList<Double> vector = new ArrayList<>();
-		for(int i=0;i<matrix_.get(0).size();i++) {
+		for(int i=0;i<additionalRows;i++) {
 			vector.add(0.0);
 		}
 		addRow(vector,additionalRows);
@@ -153,17 +151,43 @@ public class Matriz{
 		addColumn(vector);
 	}
 	
+	public void add (int i,int j, Double value) { // Matriz de 4x4, añadir elemento en la pos 5 5 , 4 5 y 3 6
+		int contI = getMatrixRowsSize(); // 4
+		int contJ = getMatrixColumnsSize(); // 4
+		if(contJ<=j) {
+			contJ=j+1;
+			int temp = contJ - getMatrixColumnsSize();
+			ArrayList<Double> vec = new ArrayList<>(temp);
+			for(int k=0; k<temp; k++) {
+				vec.add(0.0);
+			}
+			addColumn(vec);
+		}
+		while(contI<i && contJ<j) {
+			ArrayList<Double> fila = new ArrayList<>();
+			for(int k=0;k<contJ;k++) {
+				fila.add(0.0);
+			}
+			addRow(fila,1);
+			contI++;
+		}
+		set(i,j,value);
+	}
+	
 	public void addRow(ArrayList<Double> newRow,int numberOfRows) {	
 		for(int i=0;i<numberOfRows;i++) {
 			matrix_.add(newRow);
+			nFilas_++;
 		}
 	}
 
 	public void addColumn(ArrayList<Double> newColumn) {
 	    for (int i = 0; i < matrix_.size(); i++) {
 	        ArrayList<Double> row = (ArrayList<Double>) getRow(i);
-	        for(int j=0; j< newColumn.size(); j++ )
+	        nColumnas_++;
+	        for(int j=0; j< newColumn.size(); j++ ) {
 	        	row.add(newColumn.get(j));
+	        }
 	    }              
 	}
 	
@@ -190,7 +214,12 @@ public class Matriz{
 	}
 
 	public Matriz strassen(Matriz b) {
+
 		powerOfTwo();
+		System.out.println(this.getMatrixRowsSize());
+		System.out.println(this.getMatrixColumnsSize());
+		System.out.println(b.getMatrixRowsSize());
+		System.out.println(b.getMatrixColumnsSize());
 		if(sameSize(this,b))
 			return strassen(this,b);
 		return null;
@@ -203,6 +232,7 @@ public class Matriz{
 		}
 		return mismoSize;
 	}
+	
 	public static Matriz strassen(Matriz a,Matriz b) 
 	{
 		int n = a.getMatrixRowsSize();
@@ -211,18 +241,20 @@ public class Matriz{
 		{
 			Double temp = result.getElementByPosition(0,0);
 			temp= a.getElementByPosition(0,0) * b.getElementByPosition(0, 0);
+			result.add(0,0,temp);
 		}
 		else
 		{
-			Matriz A11 = new Matriz(a.getMatrixRowsSize()/2,a.getMatrixColumnsSize()/2);
-			Matriz A12 = new Matriz(a.getMatrixRowsSize()/2,a.getMatrixColumnsSize()/2);
-			Matriz A21 = new Matriz(a.getMatrixRowsSize()/2,a.getMatrixColumnsSize()/2);
-			Matriz A22 = new Matriz(a.getMatrixRowsSize()/2,a.getMatrixColumnsSize()/2);
+			int  nm = a.getMatrixRowsSize()/2;
+			Matriz A11 = new Matriz(nm);
+			Matriz A12 = new Matriz(nm);
+			Matriz A21 = new Matriz(nm);
+			Matriz A22 = new Matriz(nm);
 			
-			Matriz B11 = new Matriz(b.getMatrixRowsSize()/2,b.getMatrixColumnsSize()/2);
-			Matriz B12 = new Matriz(b.getMatrixRowsSize()/2,b.getMatrixColumnsSize()/2);
-			Matriz B21 = new Matriz(b.getMatrixRowsSize()/2,b.getMatrixColumnsSize()/2);
-			Matriz B22 = new Matriz(b.getMatrixRowsSize()/2,b.getMatrixColumnsSize()/2);
+			Matriz B11 = new Matriz(nm);
+			Matriz B12 = new Matriz(nm);
+			Matriz B21 = new Matriz(nm);
+			Matriz B22 = new Matriz(nm);
 	
 			divide(a, A11, 0 , 0);
 			divide(a, A12, 0 , n/2);
@@ -258,11 +290,12 @@ public class Matriz{
 	public static Matriz add(Matriz A, Matriz B)
 	{
 		int n = A.getMatrixRowsSize();
-		Matriz result = new Matriz(n,n);
+		Matriz result = new Matriz(n);
 		for(int i=0; i<n; i++)
 			for(int j=0; j<A.getMatrixColumnsSize(); j++) {
 				Double temp = result.getElementByPosition(i, j);
 				temp = A.getElementByPosition(i, j) + B.getElementByPosition(i, j);
+				result.add(i, j, temp);
 			}
 		return result;
 	}
@@ -270,12 +303,12 @@ public class Matriz{
 	public static Matriz sub(Matriz A, Matriz B)
 	{
 		int n = A.getMatrixRowsSize();
-		Matriz result = new Matriz(n,n);
+		Matriz result = new Matriz(n);
 		for(int i=0; i<n; i++)
 			for(int j=0; j<A.getMatrixColumnsSize(); j++) {
 				Double temp = result.getElementByPosition(i, j);
 				temp = A.getElementByPosition(i,j) - B.getElementByPosition(i, j);
-				
+				result.add(i, j, temp);
 			}
 		return result;
 	}
@@ -287,17 +320,10 @@ public class Matriz{
 			{
 				Double temp = c1.getElementByPosition(i1, j1);
 				temp = p1.getElementByPosition(i2,j2);
+				c1.add(i1,j1,temp);
 			}
 	}
 	
-	
-	public void set(int i,int j,Double number) {
-		matrix_.get(i).set(j,number);
-	}
-	
-	public Double get(int i, int j) {
-		return 
-	}
 	public static void copy(Matriz c1, Matriz p1, int iB, int jB)
 	{
 		for(int i1 = 0, i2=iB; i1<c1.getMatrixRowsSize(); i1++, i2++)
@@ -305,6 +331,16 @@ public class Matriz{
 			{
 				Double temp = p1.getElementByPosition(i2,j2);
 				temp = c1.getElementByPosition(i1, j1);
+				p1.add(i2, j2, temp);
 			}
 	}
+	
+	public void set(int i,int j,Double number) {
+		matrix_.get(i).set(j,number);
+	}
+	
+	public Double get(int i, int j) {
+		return matrix_.get(i).get(j);
+	}
+	
 }
