@@ -1,5 +1,5 @@
 # Assignment structure
-
+- El informe se encuentra en la carpeta report
 This directory is organised as follows:
 
       .
