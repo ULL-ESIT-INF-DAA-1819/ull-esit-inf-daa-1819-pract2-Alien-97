@@ -198,6 +198,25 @@ public class Matriz{
 	public List<Double> getRow(int rowIndex) {
 		return  matrix_.get(rowIndex);
 	}
+	
+	public Matriz tresBucles(Matriz b) {
+		if(this.getMatrixColumnsSize()==b.getMatrixRowsSize()) {
+			return tresBucles(this,b);
+		}
+		return null;
+	}
+	public Matriz tresBucles(Matriz a, Matriz b) {
+		Matriz result = new Matriz(a.getMatrixRowsSize());
+		for(int i=0; i<a.getMatrixRowsSize();i++) {
+			for(int j=0;j<a.getMatrixColumnsSize();j++) {
+				for(int k=0;k<a.getMatrixRowsSize();k++) {
+					Double temp = a.get(i, k) * b.get(k, j);
+					result.add(i, j, temp);
+				}
+			}
+		}
+		return a;
+	}
 
 	public String toString() {
 		String entrada= "Matriz " + "\n";
@@ -216,12 +235,10 @@ public class Matriz{
 	public Matriz strassen(Matriz b) {
 
 		powerOfTwo();
-		System.out.println(this.getMatrixRowsSize());
-		System.out.println(this.getMatrixColumnsSize());
-		System.out.println(b.getMatrixRowsSize());
-		System.out.println(b.getMatrixColumnsSize());
-		if(sameSize(this,b))
+		
+		if(sameSize(this,b)) {
 			return strassen(this,b);
+		}
 		return null;
 	}
 	
@@ -236,6 +253,7 @@ public class Matriz{
 	public static Matriz strassen(Matriz a,Matriz b) 
 	{
 		int n = a.getMatrixRowsSize();
+		//System.out.println(n);
 		Matriz result = new Matriz(n);//Duda
 		if(n == 1)
 		{
@@ -245,6 +263,7 @@ public class Matriz{
 		}
 		else
 		{
+			//System.out.println("Hola, estoy en Strassen");
 			int  nm = a.getMatrixRowsSize()/2;
 			Matriz A11 = new Matriz(nm);
 			Matriz A12 = new Matriz(nm);
@@ -255,7 +274,7 @@ public class Matriz{
 			Matriz B12 = new Matriz(nm);
 			Matriz B21 = new Matriz(nm);
 			Matriz B22 = new Matriz(nm);
-	
+			
 			divide(a, A11, 0 , 0);
 			divide(a, A12, 0 , n/2);
 			divide(a, A21, n/2, 0);
