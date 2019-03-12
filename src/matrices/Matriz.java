@@ -237,6 +237,10 @@ public class Matriz{
 		powerOfTwo();
 		
 		if(sameSize(this,b)) {
+			System.out.println(this.getMatrixRowsSize());
+			System.out.println(this.getMatrixColumnsSize());
+			System.out.println(b.getMatrixRowsSize());
+			System.out.println(b.getMatrixColumnsSize());
 			return strassen(this,b);
 		}
 		return null;
